@@ -5,6 +5,7 @@ class GildedRose {
     public static final String BACKSTAGE_PASSES = "Backstage passes to a TAFKAL80ETC concert";
     public static final String SULFURAS = "Sulfuras, Hand of Ragnaros";
     public static final String CONJURED = "Conjured";
+    public static final int DEFAULT_ADJUSTMENT_STEP = 1;
     Item[] items;
 
     public GildedRose(Item[] items) {
@@ -18,54 +19,52 @@ class GildedRose {
     }
 
     private void updateItemQuality(Item item) {
-        if (item.name.equals(SULFURAS)) {
+        boolean itemQualityDoesNotUpdate = item.name.equals(SULFURAS);
+        if (itemQualityDoesNotUpdate) {
             return;
         }
 
         boolean sellInPassed = item.sellIn < 1;
         boolean nameContainsConjured = item.name.contains(CONJURED);
+        int adjustment = (sellInPassed || nameContainsConjured) ? DEFAULT_ADJUSTMENT_STEP * 2 : DEFAULT_ADJUSTMENT_STEP;
 
-        int defaultAdjustment = 1;
-        int adjustmentFactoringInSellInAndType = (sellInPassed || nameContainsConjured) ? defaultAdjustment * 2 : defaultAdjustment;
-
-        handleBackstagePasses(item, sellInPassed, defaultAdjustment);
-        handleBrie(item, adjustmentFactoringInSellInAndType);
-        handleItemsWithoutRequirements(item, adjustmentFactoringInSellInAndType);
+        switch (item.name) {
+            case AGED_BRIE:
+                handleBrie(item, adjustment);
+                break;
+            case BACKSTAGE_PASSES:
+                handleBackstagePasses(item, sellInPassed, adjustment);
+                break;
+            default:
+                handleItemsWithoutRequirements(item, adjustment);
+        }
     }
 
     private void handleItemsWithoutRequirements(Item item, int adjustmentFactoringInSellInAndType) {
-        if (!item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES)) {
-            decreaseQuality(item, adjustmentFactoringInSellInAndType);
-            decreaseSellIn(item);
-        }
+        decreaseQuality(item, adjustmentFactoringInSellInAndType);
+        decreaseSellIn(item);
     }
 
     private void handleBrie(Item item, int adjustmentFactoringInSellInAndType) {
-        if (item.name.equals(AGED_BRIE)) {
-            increaseQuality(item, adjustmentFactoringInSellInAndType);
-            decreaseSellIn(item);
-        }
+        increaseQuality(item, adjustmentFactoringInSellInAndType);
+        decreaseSellIn(item);
     }
 
     private void handleBackstagePasses(Item item, boolean sellInPassed, int defaultAdjustment) {
+        increaseQuality(item, defaultAdjustment);
         if (item.name.equals(BACKSTAGE_PASSES)) {
-            increaseQuality(item, defaultAdjustment);
-
-            if (item.name.equals(BACKSTAGE_PASSES)) {
-                if (item.sellIn < 11) {
-                    increaseQuality(item, defaultAdjustment);
-                }
-
-                if (item.sellIn < 6) {
-                    increaseQuality(item, defaultAdjustment);
-                }
+            if (item.sellIn < 11) {
+                increaseQuality(item, defaultAdjustment);
             }
-
-            decreaseSellIn(item);
-
-            if (sellInPassed) {
-                setQualityToZero(item);
+            if (item.sellIn < 6) {
+                increaseQuality(item, defaultAdjustment);
             }
+        }
+
+        decreaseSellIn(item);
+
+        if (sellInPassed) {
+            setQualityToZero(item);
         }
     }
 
