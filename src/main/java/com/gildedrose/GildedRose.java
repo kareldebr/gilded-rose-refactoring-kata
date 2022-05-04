@@ -24,11 +24,30 @@ class GildedRose {
 
         boolean sellInPassed = item.sellIn < 1;
         boolean nameContainsConjured = item.name.contains(CONJURED);
-        boolean decreasesInQualityOverTime = !item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES);
 
         int defaultAdjustment = 1;
         int adjustmentFactoringInSellInAndType = (sellInPassed || nameContainsConjured) ? defaultAdjustment * 2 : defaultAdjustment;
 
+        handleBackstagePasses(item, sellInPassed, defaultAdjustment);
+        handleBrie(item, adjustmentFactoringInSellInAndType);
+        handleItemsWithoutRequirements(item, adjustmentFactoringInSellInAndType);
+    }
+
+    private void handleItemsWithoutRequirements(Item item, int adjustmentFactoringInSellInAndType) {
+        if (!item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES)) {
+            decreaseQuality(item, adjustmentFactoringInSellInAndType);
+            decreaseSellIn(item);
+        }
+    }
+
+    private void handleBrie(Item item, int adjustmentFactoringInSellInAndType) {
+        if (item.name.equals(AGED_BRIE)) {
+            increaseQuality(item, adjustmentFactoringInSellInAndType);
+            decreaseSellIn(item);
+        }
+    }
+
+    private void handleBackstagePasses(Item item, boolean sellInPassed, int defaultAdjustment) {
         if (item.name.equals(BACKSTAGE_PASSES)) {
             increaseQuality(item, defaultAdjustment);
 
@@ -47,16 +66,6 @@ class GildedRose {
             if (sellInPassed) {
                 setQualityToZero(item);
             }
-        }
-
-        if (item.name.equals(AGED_BRIE)) {
-            increaseQuality(item, adjustmentFactoringInSellInAndType);
-            decreaseSellIn(item);
-        }
-
-        if (decreasesInQualityOverTime) {
-            decreaseQuality(item, adjustmentFactoringInSellInAndType);
-            decreaseSellIn(item);
         }
     }
 
