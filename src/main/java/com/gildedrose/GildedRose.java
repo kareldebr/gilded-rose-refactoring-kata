@@ -4,6 +4,7 @@ class GildedRose {
     public static final String AGED_BRIE = "Aged Brie";
     public static final String BACKSTAGE_PASSES = "Backstage passes to a TAFKAL80ETC concert";
     public static final String SULFURAS = "Sulfuras, Hand of Ragnaros";
+    public static final String CONJURED = "Conjured";
     Item[] items;
 
     public GildedRose(Item[] items) {
@@ -22,9 +23,11 @@ class GildedRose {
         }
 
         boolean sellInPassed = item.sellIn < 1;
+        boolean nameContainsConjured = item.name.contains(CONJURED);
         boolean decreasesInQualityOverTime = !item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES);
+
         int defaultAdjustment = 1;
-        int adjustmentFactoringInSellInValue = sellInPassed ? defaultAdjustment * 2 : defaultAdjustment;
+        int adjustmentFactoringInSellInAndType = (sellInPassed || nameContainsConjured) ? defaultAdjustment * 2 : defaultAdjustment;
 
         if (item.name.equals(BACKSTAGE_PASSES)) {
             increaseQuality(item, defaultAdjustment);
@@ -47,12 +50,12 @@ class GildedRose {
         }
 
         if (item.name.equals(AGED_BRIE)) {
-            increaseQuality(item, adjustmentFactoringInSellInValue);
+            increaseQuality(item, adjustmentFactoringInSellInAndType);
             decreaseSellIn(item);
         }
 
         if (decreasesInQualityOverTime) {
-            decreaseQuality(item, adjustmentFactoringInSellInValue);
+            decreaseQuality(item, adjustmentFactoringInSellInAndType);
             decreaseSellIn(item);
         }
     }
