@@ -12,59 +12,43 @@ class GildedRose {
         this.items = items;
     }
 
-    public void updateQuality() {
+    public void updateItems() {
         for (Item item : items) {
-            updateItemQuality(item);
+            boolean itemDoesNotUpdate = item.name.equals(SULFURAS);
+            if (itemDoesNotUpdate) {
+                continue;
+            }
+
+            boolean sellInPassed = item.sellIn < 1;
+
+            updateItemQuality(item, sellInPassed);
+            updateItemSellInAndQualityBasedOnSellIn(item, sellInPassed);
         }
     }
 
-    private void updateItemQuality(Item item) {
-        boolean itemQualityDoesNotUpdate = item.name.equals(SULFURAS);
-        if (itemQualityDoesNotUpdate) {
-            return;
-        }
-
-        boolean sellInPassed = item.sellIn < 1;
+    private void updateItemQuality(Item item, boolean sellInPassed) {
         boolean nameContainsConjured = item.name.contains(CONJURED);
         int adjustment = (sellInPassed || nameContainsConjured) ? DEFAULT_ADJUSTMENT_STEP * 2 : DEFAULT_ADJUSTMENT_STEP;
 
         switch (item.name) {
             case AGED_BRIE:
-                handleBrie(item, adjustment);
+                increaseQuality(item, adjustment);
                 break;
             case BACKSTAGE_PASSES:
-                handleBackstagePasses(item, sellInPassed, adjustment);
+                handleBackstagePasses(item, adjustment);
                 break;
             default:
-                handleItemsWithoutRequirements(item, adjustment);
+                decreaseQuality(item, adjustment);
         }
     }
 
-    private void handleItemsWithoutRequirements(Item item, int adjustmentFactoringInSellInAndType) {
-        decreaseQuality(item, adjustmentFactoringInSellInAndType);
-        decreaseSellIn(item);
-    }
-
-    private void handleBrie(Item item, int adjustmentFactoringInSellInAndType) {
-        increaseQuality(item, adjustmentFactoringInSellInAndType);
-        decreaseSellIn(item);
-    }
-
-    private void handleBackstagePasses(Item item, boolean sellInPassed, int defaultAdjustment) {
-        increaseQuality(item, defaultAdjustment);
-        if (item.name.equals(BACKSTAGE_PASSES)) {
-            if (item.sellIn < 11) {
-                increaseQuality(item, defaultAdjustment);
-            }
-            if (item.sellIn < 6) {
-                increaseQuality(item, defaultAdjustment);
-            }
+    private void handleBackstagePasses(Item item, int adjustment) {
+        increaseQuality(item, adjustment);
+        if (item.sellIn < 11) {
+            increaseQuality(item, adjustment);
         }
-
-        decreaseSellIn(item);
-
-        if (sellInPassed) {
-            setQualityToZero(item);
+        if (item.sellIn < 6) {
+            increaseQuality(item, adjustment);
         }
     }
 
@@ -72,8 +56,12 @@ class GildedRose {
         item.quality = 0;
     }
 
-    private void decreaseSellIn(Item item) {
+    private void updateItemSellInAndQualityBasedOnSellIn(Item item, boolean sellInPassed) {
         item.sellIn = item.sellIn - 1;
+
+        if (sellInPassed && item.name.equals(BACKSTAGE_PASSES)) {
+            setQualityToZero(item);
+        }
     }
 
     private void increaseQuality(Item item, int adjustment) {
