@@ -35,21 +35,21 @@ class GildedRose {
                 increaseQuality(item, adjustment);
                 break;
             case BACKSTAGE_PASSES:
-                handleBackstagePasses(item, adjustment);
+                increaseQualityOfBackstagePasses(item, adjustment);
                 break;
             default:
                 decreaseQuality(item, adjustment);
         }
     }
 
-    private void handleBackstagePasses(Item item, int adjustment) {
-        increaseQuality(item, adjustment);
-        if (item.sellIn < 11) {
-            increaseQuality(item, adjustment);
+    private void increaseQualityOfBackstagePasses(Item backstagePasses, int adjustment) {
+        if (backstagePasses.sellIn <= 10) {
+            adjustment++;
         }
-        if (item.sellIn < 6) {
-            increaseQuality(item, adjustment);
+        if (backstagePasses.sellIn <= 5) {
+            adjustment++;
         }
+        increaseQuality(backstagePasses, adjustment);
     }
 
     private void setQualityToZero(Item item) {
@@ -57,7 +57,7 @@ class GildedRose {
     }
 
     private void updateItemSellInAndQualityBasedOnSellIn(Item item, boolean sellInPassed) {
-        item.sellIn = item.sellIn - 1;
+        item.sellIn -= 1;
 
         if (sellInPassed && item.name.equals(BACKSTAGE_PASSES)) {
             setQualityToZero(item);
@@ -66,13 +66,13 @@ class GildedRose {
 
     private void increaseQuality(Item item, int adjustment) {
         if (item.quality < 50) {
-            item.quality = item.quality + adjustment;
+            item.quality += adjustment;
         }
     }
 
     private void decreaseQuality(Item item, int adjustment) {
         if (item.quality > 0) {
-            item.quality = item.quality - adjustment;
+            item.quality -= adjustment;
         }
     }
 }
