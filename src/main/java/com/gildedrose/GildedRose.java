@@ -22,6 +22,7 @@ class GildedRose {
         }
 
         boolean sellInPassed = item.sellIn < 1;
+        boolean decreasesInQualityOverTime = !item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES);
 
         if (item.name.equals(BACKSTAGE_PASSES)) {
             increaseQuality(item);
@@ -35,29 +36,35 @@ class GildedRose {
                     increaseQuality(item);
                 }
             }
+
+            decreaseSellIn(item);
+
+            if (sellInPassed) {
+                setQualityToZero(item);
+            }
         }
 
         if (item.name.equals(AGED_BRIE)) {
             increaseQuality(item);
-        }
+            decreaseSellIn(item);
 
-        if (!item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES)) {
-            decreaseQuality(item);
-        }
-
-        decreaseSellIn(item);
-
-        if (sellInPassed) {
-            if (!item.name.equals(AGED_BRIE)) {
-                if (!item.name.equals(BACKSTAGE_PASSES)) {
-                    decreaseQuality(item);
-                } else {
-                    item.quality = item.quality - item.quality;
-                }
-            } else {
+            if (sellInPassed) {
                 increaseQuality(item);
             }
         }
+
+        if (decreasesInQualityOverTime) {
+            decreaseQuality(item);
+            decreaseSellIn(item);
+
+            if (sellInPassed) {
+                decreaseQuality(item);
+            }
+        }
+    }
+
+    private void setQualityToZero(Item item) {
+        item.quality = 0;
     }
 
     private void decreaseSellIn(Item item) {
