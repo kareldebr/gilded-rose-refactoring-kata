@@ -23,17 +23,19 @@ class GildedRose {
 
         boolean sellInPassed = item.sellIn < 1;
         boolean decreasesInQualityOverTime = !item.name.equals(AGED_BRIE) && !item.name.equals(BACKSTAGE_PASSES);
+        int defaultAdjustment = 1;
+        int adjustmentFactoringInSellInValue = sellInPassed ? defaultAdjustment * 2 : defaultAdjustment;
 
         if (item.name.equals(BACKSTAGE_PASSES)) {
-            increaseQuality(item);
+            increaseQuality(item, defaultAdjustment);
 
             if (item.name.equals(BACKSTAGE_PASSES)) {
                 if (item.sellIn < 11) {
-                    increaseQuality(item);
+                    increaseQuality(item, defaultAdjustment);
                 }
 
                 if (item.sellIn < 6) {
-                    increaseQuality(item);
+                    increaseQuality(item, defaultAdjustment);
                 }
             }
 
@@ -45,21 +47,13 @@ class GildedRose {
         }
 
         if (item.name.equals(AGED_BRIE)) {
-            increaseQuality(item);
+            increaseQuality(item, adjustmentFactoringInSellInValue);
             decreaseSellIn(item);
-
-            if (sellInPassed) {
-                increaseQuality(item);
-            }
         }
 
         if (decreasesInQualityOverTime) {
-            decreaseQuality(item);
+            decreaseQuality(item, adjustmentFactoringInSellInValue);
             decreaseSellIn(item);
-
-            if (sellInPassed) {
-                decreaseQuality(item);
-            }
         }
     }
 
@@ -71,15 +65,15 @@ class GildedRose {
         item.sellIn = item.sellIn - 1;
     }
 
-    private void increaseQuality(Item item) {
+    private void increaseQuality(Item item, int adjustment) {
         if (item.quality < 50) {
-            item.quality = item.quality + 1;
+            item.quality = item.quality + adjustment;
         }
     }
 
-    private void decreaseQuality(Item item) {
+    private void decreaseQuality(Item item, int adjustment) {
         if (item.quality > 0) {
-            item.quality = item.quality - 1;
+            item.quality = item.quality - adjustment;
         }
     }
 }
